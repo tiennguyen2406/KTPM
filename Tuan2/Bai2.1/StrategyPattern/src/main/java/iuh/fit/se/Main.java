@@ -13,7 +13,7 @@ public class Main {
 
         order.setStrategy(new ExpressShipping());
         order.processOrder();
-        
+
         order.setStrategy(new SameDayShipping());
         order.processOrder();
     }
