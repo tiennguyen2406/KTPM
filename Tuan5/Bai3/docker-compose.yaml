@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: sapassword
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: always
+    ports:
+      - "8081:80"       # Map cổng 8081 của máy host vào cổng 80 của container
+    environment:
+      PMA_HOST: db      # Kết nối tới service tên là 'db' ở trên
+      PMA_PORT: 3306
+    depends_on:
+      - db              # Đảm bảo mysql khởi động trước phpmyadmin

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  nodejs-app:
+    build: .
+    ports:
+      - "3000:3000"
+    container_name: nodejs-express-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production

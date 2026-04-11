@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    image: nginx:alpine
+    container_name: web-server
+    networks:
+      - private-network
+    depends_on:
+      - api
+
+  api:
+    image: alpine:latest
+    container_name: api-server
+    networks:
+      - private-network
+    command: sh -c "echo 'API Server running on private network' && sleep infinity"
+
+  client:
+    image: alpine:latest
+    container_name: network-client
+    networks:
+      - private-network
+    command: sh -c "echo 'Client container on private network' && sleep infinity"
+
+networks:
+  private-network:
+    driver: bridge
+    internal: true

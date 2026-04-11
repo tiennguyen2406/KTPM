@@ -1,0 +1,8 @@
+version: '3.8' # Phiên bản Docker Compose
+
+services:
+  web-nginx:          # Tên dịch vụ (có thể đặt tùy ý)
+    image: nginx:latest # Sử dụng image nginx phiên bản mới nhất
+    ports:
+      - "8080:80"     # Map cổng 8080 của máy host vào cổng 80 của container
+    restart: always    # Tự động khởi động lại nếu container bị lỗi
