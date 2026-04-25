@@ -1,0 +1,6 @@
+com\movie\ticket\user\controller\UserController.class
+com\movie\ticket\user\UserServiceApplication.class
+com\movie\ticket\user\service\UserService.class
+com\movie\ticket\user\dto\UserRegisteredEvent.class
+com\movie\ticket\user\entity\User.class
+com\movie\ticket\user\repository\UserRepository.class
