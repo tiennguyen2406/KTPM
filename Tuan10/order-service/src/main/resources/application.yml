@@ -1,0 +1,129 @@
+spring:
+  application:
+    name: order-service
+
+  datasource:
+    url: jdbc:h2:mem:orderdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8083
+  address: 0.0.0.0
+
+clients:
+  user-service:
+    url: ${USER_SERVICE_URL:http://localhost:8081}
+  food-service:
+    url: ${FOOD_SERVICE_URL:http://localhost:8082}
+
+internal:
+  service-token: ${SERVICE_TOKEN:service-token}
+
+# ===================================================================
+# Actuator - expose Resilience4j endpoints for monitoring
+# ===================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers,circuitbreakerevents,retries,retryevents,ratelimiters,ratelimiterevents,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+
+# ===================================================================
+# Resilience4j Configuration
+# ===================================================================
+resilience4j:
+
+  # ----- Circuit Breaker -----
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        slidingWindowType: COUNT_BASED
+        recordExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.FeignException
+        ignoreExceptions:
+          - iuh.fit.orderservice.exception.BusinessException
+    instances:
+      userService:
+        baseConfig: default
+        slidingWindowSize: 10
+        waitDurationInOpenState: 15s
+        failureRateThreshold: 50
+      foodService:
+        baseConfig: default
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+
+  # ----- Retry -----
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.FeignException
+        ignoreExceptions:
+          - iuh.fit.orderservice.exception.BusinessException
+    instances:
+      userService:
+        baseConfig: default
+        maxAttempts: 3
+        waitDuration: 1s
+      foodService:
+        baseConfig: default
+        maxAttempts: 3
+        waitDuration: 500ms
+
+  # ----- Rate Limiter -----
+  ratelimiter:
+    configs:
+      default:
+        registerHealthIndicator: true
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+        eventConsumerBufferSize: 100
+    instances:
+      orderCreation:
+        baseConfig: default
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 5s
+      orderQuery:
+        baseConfig: default
+        limitForPeriod: 20
+        limitRefreshPeriod: 1s
+        timeoutDuration: 5s

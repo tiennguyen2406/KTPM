@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Service - Resilience4j Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🍜 Order Service Dashboard</h1>
+    <p>Đặt món ăn qua Resilience4j — CircuitBreaker • Retry • RateLimiter</p>
+  </div>
+
+  <!-- ===== CATEGORY FILTER ===== -->
+  <div id="catBar" class="cat-bar"></div>
+
+  <!-- ===== FOOD GRID ===== -->
+  <div id="foodGrid" class="food-grid"><p style="color:var(--text-muted)">Đang tải sản phẩm...</p></div>
+
+  <!-- ===== CART + ORDER ===== -->
+  <div class="cart-bar">
+    <div class="cart-header">
+      <h3>🛒 Giỏ Hàng <span class="cart-badge" id="cartBadge">0</span></h3>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.85rem">
+        <span>Giả lập lỗi:</span>
+        <strong id="failureStatus" style="color:#10b981">TẮT 🟢</strong>
+      </div>
+    </div>
+    <div class="cart-items" id="cartItems"><p class="cart-empty">Giỏ hàng trống</p></div>
+    <div class="cart-total"><span>Tổng cộng:</span><span id="cartTotal">0đ</span></div>
+    <div class="cart-actions">
+      <button class="btn btn-primary" onclick="placeOrder()">📦 Đặt Hàng (qua Resilience4j)</button>
+      <button class="btn btn-secondary" onclick="clearCart()">🗑️ Xóa giỏ</button>
+      <button class="btn btn-danger" onclick="toggleFailure(true)" title="Bật lỗi giả lập để test CircuitBreaker & Retry">🔴 Bật Lỗi</button>
+      <button class="btn btn-success" onclick="toggleFailure(false)">🟢 Tắt Lỗi</button>
+      <button class="btn btn-warning" onclick="burstOrder(15)" title="Gửi 15 đơn cùng lúc để test RateLimiter">💥 Burst 15 đơn</button>
+      <button class="btn btn-secondary" onclick="resetDemo()">🔄 Reset</button>
+    </div>
+  </div>
+
+  <!-- ===== RESILIENCE4J MONITOR ===== -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <div class="card-icon cb">📊</div>
+      <div>
+        <div class="card-title">Resilience4j Monitor</div>
+        <div class="card-subtitle">Trạng thái CircuitBreaker, Retry, RateLimiter — Calls: <strong id="callCount">0</strong></div>
+      </div>
+    </div>
+    <div class="monitor-grid">
+      <div class="metric-box">
+        <div class="metric-label">foodService CircuitBreaker</div>
+        <div class="metric-value closed" id="m-cb-foodService">CLOSED</div>
+        <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px" id="m-det-foodService">—</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">userService CircuitBreaker</div>
+        <div class="metric-value closed" id="m-cb-userService">CLOSED</div>
+        <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px" id="m-det-userService">—</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">orderCreation RateLimiter</div>
+        <div class="metric-value" style="color:var(--blue)">10 req/s</div>
+        <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px">limitForPeriod=10</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Retry Config</div>
+        <div class="metric-value" style="color:var(--orange)">3 lần</div>
+        <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px">exponential backoff</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin:12px 0">
+      <button class="btn btn-secondary btn-sm" onclick="refreshMonitor()">🔄 Refresh</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearLog()">🗑️ Clear Log</button>
+    </div>
+    <div class="result" id="logArea" style="max-height:300px"><span class="log-muted">Sẵn sàng nhận log... Hãy thêm sản phẩm vào giỏ và nhấn "Đặt Hàng" để test!</span></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
